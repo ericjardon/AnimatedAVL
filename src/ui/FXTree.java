@@ -1,18 +1,23 @@
 package ui;
 
 import javafx.animation.TranslateTransition;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
+import javafx.scene.Node;
 import javafx.scene.shape.Line;
 import javafx.util.Duration;
+import sample.AVL;
 import sample.Nodo;
-import static java.lang.Math.abs;
+
+import javax.swing.*;
 
 public class FXTree<T extends Comparable<T>> extends Group {
     // impresora independiente de clase Árbol. Toma una raíz y la "imprime" con componentes de FX recursivamente,
     // guardando registro de las coordenadas referencia y usando añadiendo una diferencia para las coordenadas nuevas.
 
+    public AVL arbol;
     // nueva implementación
     double addWidth = 20;
     double addHeight = 30;
@@ -23,6 +28,10 @@ public class FXTree<T extends Comparable<T>> extends Group {
         this.prefHeight(800);
         this.prefWidth(800);
     }*/
+    public FXTree(AVL arbol) {
+        super();
+        this.arbol = arbol;
+    }
 
     /*        MÉTODOS   NUEVOS    */
     public void imprimir(Nodo<T> raiz) {
@@ -97,12 +106,8 @@ public class FXTree<T extends Comparable<T>> extends Group {
         nodeAnimation.play();*/
 
         System.out.println("----------");
-        System.out.println(nodoPadre.getElemento() + " X:"+refX +"//  Y:"+ refY);  // debugging purposes
+        System.out.println(nodoPadre.getElemento() + " ("+refX +", "+ refY+")");  // debugging purposes
     }
-
-    // idea: que el grupo de la impresión si guarde la nueva organización, pero no se despliegue aún, antes de desplegarlo, se hace la animación?
-    // o desplegarlo e inmediatamente después hacer la animación.
-    // la animación sería un método que toma los nodos a animar? superpuesto: para un nodo, para una línea y dos nodos.
 
     public void animarInsertion(Nodo<T> nodo) {
         TranslateTransition nodeAnimation = new TranslateTransition(Duration.seconds(1), nodo.getUi());
@@ -111,7 +116,6 @@ public class FXTree<T extends Comparable<T>> extends Group {
         nodeAnimation.setToX(0);
         nodeAnimation.setToY(0);
         if (nodo.getAristaAlPadre()!=null) {
-            System.out.println("Sí entra");
             nodo.getAristaAlPadre().endXProperty().bind(nodo.getUi().xProperty().add(nodo.getUi().translateXProperty()));
             nodo.getAristaAlPadre().endYProperty().bind(nodo.getUi().yProperty().add(nodo.getUi().translateYProperty()));
         }
@@ -119,34 +123,40 @@ public class FXTree<T extends Comparable<T>> extends Group {
         nodeAnimation.play();
     }
 
-    /*        MÉTODOS   VIEJOS    */
-    public void animateInsertion(Nodo<T> root, Nodo<T> child, double offset) {
-        // crear arista con start en root y end en child.
-        // animar para colocar donde deberían según las coordenadas de centro de cada uno
-        double toX = root.getUi().getCircle().getCenterX() + offset;
-        double toY = root.getUi().getCircle().getCenterY() + (20);
-        //addNodeUi(child, toX,toY);
-        Arista<T> line = new Arista<T>(root,child);
-        this.getChildren().add(line);
-        TranslateTransition textAnimation = new TranslateTransition(Duration.seconds(1), child.getUi().getE());
-        textAnimation.setFromX(-toX);
-        textAnimation.setFromY(-toY);
-        textAnimation.setToX(0);
-        textAnimation.setToY(0);      // corresponden a x,y de Layout o de Círculo?
-        TranslateTransition c2Animation = new TranslateTransition(Duration.seconds(1), child.getUi().getCircle());
-        c2Animation.setFromX(-toX);
-        c2Animation.setFromY(-toY);
-        c2Animation.setToX(0);
-        c2Animation.setToY(0);
-        /*line.startXProperty().bind(line.getC1().centerXProperty().add(line.getC1().translateXProperty()));
-        line.startYProperty().bind(line.getC1().centerYProperty().add(line.getC1().translateYProperty()));
-        line.endXProperty().bind(line.getC2().centerXProperty().add(line.getC2().translateXProperty()));
-        line.endYProperty().bind(line.getC2().centerYProperty().add(line.getC2().translateYProperty()));*/
-        c2Animation.setCycleCount(3);
-        c2Animation.play();
-        textAnimation.setCycleCount(3);
-        textAnimation.play();
-        //System.out.println("New Layout for (" + child.getElemento() + "): " + child.getUi().getLayoutX() + child.getUi().getLayoutY() );
-        System.out.println("New Center for ("+ child.getElemento() + "): " + child.getUi().getCircle().getCenterX() + child.getUi().getCircle().getCenterY());
+    public void animarDeletion(Nodo<T> nodo) {
+        TranslateTransition nodeAnimation = new TranslateTransition(Duration.seconds(1), nodo.getUi());
+        nodeAnimation.setByX(-(nodo.getUi().getX()+15));
+        nodeAnimation.setByY(-(nodo.getUi().getY())+15);
+        nodeAnimation.setCycleCount(1);
+        nodeAnimation.play();
+        nodeAnimation.setOnFinished(new EliminaEvent(this.getChildren(), nodo.getElemento()));
+        this.getChildren().remove(nodo.getAristaAlPadre());
+    }
+
+    public void insertar(T input) {
+        this.getChildren().clear();
+        arbol.insertar(input);
+        imprimir(arbol.getRaiz());
+        animarInsertion(arbol.findNode(input));
+    }
+
+    public void eliminar(T input) {
+        animarDeletion(arbol.findNode(input));
+    }
+
+    class EliminaEvent implements EventHandler<ActionEvent>{
+        ObservableList<Node> children;
+        T input;
+
+        public EliminaEvent(ObservableList<Node> children, T input) {
+            this.children = children;
+            this.input = input;
+        }
+        @Override
+        public void handle(ActionEvent event) {
+            children.clear();
+            arbol.remove(input);
+            imprimir(arbol.getRaiz());
+        }
     }
 }

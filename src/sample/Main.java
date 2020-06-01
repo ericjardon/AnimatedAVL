@@ -22,7 +22,7 @@ public class Main extends Application {
 
         AVL<Integer> a = new AVL<>();
         primaryStage.setTitle("AVL Tree");
-        FXTree<Integer> treePrinter = new FXTree<>();
+        FXTree<Integer> treePrinter = new FXTree<>(a);
 
         // Botones
         Button insertBtn =new Button("Insertar");
@@ -39,56 +39,26 @@ public class Main extends Application {
         deletionBox = new HBox(8,deleteBtn,deleteField);
         menu = new VBox(20,insertionBox,deletionBox);
 
-        // Setting Layout Positions
-        /*insertBtn.setLayoutX(30);
-        insertBtn.setLayoutY(80);
-        insertField.setLayoutX(110);
-        insertField.setLayoutY(80);
-        //VBox menuVBox = new VBox(10, , , );
-
-        deleteBtn.setLayoutX(30);
-        deleteBtn.setLayoutY(120);
-        deleteField.setLayoutX(110);
-        deleteField.setLayoutY(130);*/
-
         Group gp = new Group();
         gp.getChildren().addAll(treePrinter, menu);
 
         // EVENT HANDLERS
-        // DELETE
-        deleteBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                int input = Integer.parseInt(deleteField.getText());
-                //si no lo encuentra
-                if (a.findNode(input) == null) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Alerta");
-                    alert.setHeaderText("Error al eliminar elemento");
-                    alert.setContentText(input + " no se encuentra en el árbol.");
-                    alert.showAndWait();
-                    deleteField.clear();
-                } else {
-                    treePrinter.getChildren().clear();
-                    a.remove(input);
-                    deleteField.clear();
-                    treePrinter.imprimir(a.getRaiz());
-                }
-            }
-            // idea: imprimir se apoya de un recursivo, podríamos indicarle la raíz como el nodopadre donde hubo modificación.
-            // Así solo reimprime esa parte y la reanima.
-        });
         // INSERT
         insertBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 try {
                     int input = Integer.parseInt(insertField.getText());
-                    treePrinter.getChildren().clear();
-                    a.insertar(input);
-                    insertField.clear();
-                    treePrinter.imprimir(a.getRaiz());
-                    treePrinter.animarInsertion(a.findNode(input));
+                    if (a.findNode(input) != null) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Alerta");
+                        alert.setHeaderText("Elemento duplicado");
+                        alert.setContentText(input + " ya se encuentra en el árbol.");
+                        alert.showAndWait();
+                    } else {
+                        insertField.clear();
+                        treePrinter.insertar(input);
+                    }
                 } catch (Exception e){
                     System.out.println(e.getMessage());
                     e.printStackTrace();
@@ -98,6 +68,26 @@ public class Main extends Application {
                     alert.setContentText("Valor ingresado inválido");
                     alert.showAndWait();
                     insertField.clear();
+                }
+            }
+        });
+
+        // DELETE
+        deleteBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                int input = Integer.parseInt(deleteField.getText());
+                //si no lo encuentra
+                if (a.findNode(input) == null) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Alerta");
+                    alert.setHeaderText("Elemento inexistente.");
+                    alert.setContentText(input + " no se encuentra en el árbol.");
+                    alert.showAndWait();
+                    deleteField.clear();
+                } else {
+                    deleteField.clear();
+                    treePrinter.eliminar(input);
                 }
             }
         });
