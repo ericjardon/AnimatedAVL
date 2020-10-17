@@ -50,47 +50,42 @@ public class AVL<T extends Comparable<T>> {
         raiz = removeRec(raiz, e);
     }
     private Nodo<T> removeRec(Nodo<T> nodoPadre, T e) {
-        System.out.println("Llamada recursiva. nodoPadre = " + nodoPadre
-                + ", A eliminar: " +e);
+        //System.out.println("Llamada recursiva. nodoPadre = " + nodoPadre
+       //         + ", A eliminar: " +e);
         if (nodoPadre == null) {
-            System.out.println("nodo vacío. regresar null");
             return nodoPadre;
         } else {
             if (e.compareTo(nodoPadre.getElemento()) < 0) {
-                System.out.println("Explora izquierda");
                 nodoPadre.setIzquierdo(removeRec(nodoPadre.getIzquierdo(), e)); // actualizar Alturas
                 if (isUnbalanced(nodoPadre)) {
-                    System.out.println("Redujo arbol izquierdo. Rotar a la izquierda");
                     nodoPadre = rotarSimpleIzquierda(nodoPadre);
                 }
             }
             if (e.compareTo(nodoPadre.getElemento()) > 0) {
-                System.out.println("Explora derecha");
                 nodoPadre.setDerecho(removeRec(nodoPadre.getDerecho(), e));     // actualizar Alturas
                 if (isUnbalanced(nodoPadre)) {
-                    System.out.println("Restó a árbol derecho. Rotar a la derecha");
                     nodoPadre = rotarSimpleDerecha(nodoPadre);
                 }
             }
             else if (e.compareTo(nodoPadre.getElemento()) == 0) {
-                System.out.println("Encontramos nodo a eliminar");
+                //System.out.println("Encontramos nodo a eliminar");
                 if (nodoPadre.isLeaf()) {
-                    System.out.println("Nodo a eliminar es hoja. Regresar null");
+                    //System.out.println("Nodo a eliminar es hoja. Regresar null");
                     return null;
                 } else {
                     // si tiene un solo subárbol
                     if (nodoPadre.getIzquierdo() == null) {
-                        System.out.println("Sube subárbol derecho");
+                        //System.out.println("Sube subárbol derecho");
                         return nodoPadre.getDerecho();
                     } else if (nodoPadre.getDerecho() == null) {
-                        System.out.println("Sube subárbol izquierdo");
+                        //System.out.println("Sube subárbol izquierdo");
                         return nodoPadre.getIzquierdo();
                     }
                 }
                 // tiene dos subárboles. Sube el más valor chico del lado derecho y borramos hoja
-                System.out.println("Sustituir (" + nodoPadre.getElemento() + ") por " + findMin(nodoPadre.getDerecho()));
+                //System.out.println("Sustituir (" + nodoPadre.getElemento() + ") por " + findMin(nodoPadre.getDerecho()));
                 nodoPadre.setElemento(findMin(nodoPadre.getDerecho()));
-                System.out.println("Borrar hoja con valor duplicado");
+                //System.out.println("Borrar hoja con valor duplicado");
                 nodoPadre.setDerecho(removeRec(nodoPadre.getDerecho(),nodoPadre.getElemento())); // redujo subarbol derecho.
                 if (isUnbalanced(nodoPadre)) {
                     nodoPadre = rotarSimpleDerecha(nodoPadre);
@@ -213,6 +208,7 @@ public class AVL<T extends Comparable<T>> {
             return null;
         }
         if (elemento.compareTo(nodoPadre.getElemento()) == 0) {
+            System.out.println("Node " + elemento +  " found.");
             return nodoPadre;
         } else {
             if (elemento.compareTo(nodoPadre.getElemento()) < 0) {
